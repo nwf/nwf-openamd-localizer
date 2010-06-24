@@ -5,23 +5,26 @@ LDFLAGS+= -lpcap -lglib-2.0
 ESTIMATOR_CFLAGS=-funit-at-a-time
 
 TARGETS=estimator
-SOURCES= \
+
+COMMON_SOURCES= \
 		dispatch.c \
-		estimator.c \
-		main.c \
 		network_rx.c \
 		normalized_rxtx.c \
-		openbeacon.c \
 		pcap_rx.c \
-		readerloc.c \
 		util.c \
+
+ESTIMATOR_SOURCES= \
+		estimator.c \
+		estimation.c \
+		openbeacon.c \
+		readerloc.c \
 
 
 DEP_SUFFIX=dep
 DEPCHECK_TARGET=.depcheck
 all: $(TARGETS)
 
-estimator: $(SOURCES) $(DEPCHECK_TARGET)
+estimator: $(COMMON_SOURCES) $(ESTIMATOR_SOURCES) $(DEPCHECK_TARGET)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(ESTIMATOR_CFLAGS) -o $@ \
 	$(filter-out $(DEPCHECK_TARGET),$^)
 
@@ -39,7 +42,8 @@ DO_INCLUDE_DEPS=1
 endif
 
 ifeq (1,$(DO_INCLUDE_DEPS))
--include $(SOURCES:%.c=%.$(DEP_SUFFIX))
+-include $(COMMON_SOURCES:%.c=%.$(DEP_SUFFIX))
+-include $(ESTIMATOR_SOURCES:%.c=%.$(DEP_SUFFIX))
 endif
 
 $(DEPCHECK_TARGET):

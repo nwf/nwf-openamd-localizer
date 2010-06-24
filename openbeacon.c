@@ -5,7 +5,7 @@
 #include <glib/ghash.h>
 
 #include "dispatch.h"
-#include "estimator.h"
+#include "estimation.h"
 #include "openbeacon.h"
 #include "util.h"
 

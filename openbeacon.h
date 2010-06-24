@@ -6,7 +6,7 @@
 #include <sys/types.h>
 #include <glib/ghash.h>
 #include "dispatch.h"
-#include "estimator.h"
+#include "estimation.h"
 
 #define OPENBEACON_PROTO_BEACONTRACKER	23
 

@@ -1,85 +1,97 @@
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
+#define _GNU_SOURCE
 
-#include "config.h"
+#include <stdint.h>
+#include <strings.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#include <glib/ghash.h>
+
+#include "dispatch.h"
+#include "estimation.h"
+#include "normalized_rxtx.h"
 #include "openbeacon.h"
-#include "estimator.h"
+#include "pcap_rx.h"
+#include "readerloc.h"
 
 void
-update_badge_pos(est_badge_data *data,	/* This badge */
-					uint32_t seq,		/* This sequence number */
-					rx_loc *rxl,		/* The reader location */
-					uint8_t prox		/* Proximity multiplier */
-				)
-{
-	int index;
-	int seqdelta = seq - data->head_seqid;
-
-	if(-seqdelta >= HISTORY_WINDOW_SIZE) {
-		if(DEBUG) fprintf(stderr,
-					"Beacon (%x) in far past (vs %x) for badge data at %p\n",
-					seq, data->head_seqid, data);
-		return;
-	}
-
-
-	if((seqdelta > 0) && seqdelta < HISTORY_WINDOW_SIZE) {
-		if(DEBUG) fprintf(stderr, "NEAR FUTURE\n");
-		/* Roll the buffer forward, inserting zero cells, then
-		 * turn this into near past
-		 */
-		while(seqdelta--) {
-			data->head_posn+=1;
-			if(data->head_posn == HISTORY_WINDOW_SIZE) {
-				data->head_posn = 0;
-			}
-			est_badge_hist_cell *cell = &data->cells[data->head_posn];
-			data->denom -= cell->denom;
-			data->sumx  -= cell->sumx;
-			data->sumy  -= cell->sumy;
-			data->sumz	-= cell->sumz;
-			memset(cell, 0, sizeof(*cell));
-		}
-		data->head_seqid = seq;
-		index = data->head_posn;
-	} else if (seqdelta >= HISTORY_WINDOW_SIZE) {
-		if(DEBUG) fprintf(stderr, "FAR FUTURE\n");
-		/* discard everything, turn this into near past */
-		memset(data, 0, sizeof(*data));
-		data->head_seqid = seq;
-		index = data->head_posn;
-	} else /* near past */ {
-		if(DEBUG) fprintf(stderr, "NEAR PAST %d\n", seqdelta);
-		/* Index backwards, wrapping the fifo */
-		if (-seqdelta > data->head_posn) {
-			index = HISTORY_WINDOW_SIZE + seqdelta - data->head_posn;
-		} else {
-			index = data->head_posn + seqdelta;
-		}
-	}
-
-	assert(index >= 0 && index < HISTORY_WINDOW_SIZE);
-
-	if(DEBUG) fprintf(stderr,
-				"Head at %d, Head seq %d, index %d\n",
-				data->head_posn, data->head_seqid, index);
-	est_badge_hist_cell *cell = &data->cells[index];
-
-#define BUPD(x) do { \
-		double incr = rxl->r##x * prox; \
-		cell->sum##x += incr;           \
-		data->sum##x += incr;           \
-	} while(0)
-
-	BUPD(x);
-	BUPD(y);
-	BUPD(z);
-#undef BUPD
-
-	cell->denom += prox;
-	data->denom += prox;
+usage(void) {
+	printf("OpenBeacon aggregator framework.  Command line usage:\n");
+	printf("Packet sources: -P pcap_file, -N normalized_file, -U udp_port\n");
+	printf("Packet logging: -O normalized_file\n");
+	printf("OpenBeacon Tracker estimation output: -H human, -S structured\n");
 }
 
+int
+main(int argc, char **argv) {
+	dispatch_data dd;
+	bzero(&dd, sizeof(dd));
+
+	openbeacon_tracker_data btd;
+	bzero(&btd, sizeof(btd));
+
+	int do_tracker = 0;
+
+	FILE *normout = NULL;
+
+	FILE *sourcef = NULL;
+	// int port = -1;
+	enum { SOURCE_NONE
+	     , SOURCE_NETWORK
+	     , SOURCE_NORMALIZED
+	     , SOURCE_PCAP }
+	  source = SOURCE_NONE;
+
+	int opt;
+	while((opt = getopt(argc, argv, "H:N:O:P:S:U:h")) != -1) {
+		switch (opt) {
+		case 'H':
+			do_tracker = 1;
+			btd.human_out_file = fopen(optarg, "w");
+			break;
+		case 'N':
+			source = SOURCE_NORMALIZED;
+			if(sourcef) fclose(sourcef);
+			sourcef = fopen(optarg, "r");
+			break;
+		case 'O':
+			if(normout) fclose(normout);
+			normout = fopen(optarg, "w");
+			break;
+		case 'P':
+			source = SOURCE_PCAP;
+			if(sourcef) fclose(sourcef);
+			sourcef = fopen(optarg, "r");
+			break;
+		case 'S':
+			do_tracker = 1;
+			btd.structured_out_file = fopen(optarg, "w");
+			break;
+		case 'h':	usage(); return -1;
+		}
+	}
+
+	if(source == SOURCE_NONE) {
+		printf("No source specified; nothing to do.\n");
+		return -1;
+	}
+
+	if(do_tracker) {
+		// XXX
+		btd.rxid_location = load_reader_location_data();
+		btd.oid_estdata = g_hash_table_new(g_int_hash, g_int_equal);
+		dispatch_set_callback(&dd, OPENBEACON_PROTO_BEACONTRACKER,
+								beacontracker_cb, &btd);
+	}
+	if(normout != NULL) {
+		dispatch_set_omni_callback(&dd, normalized_write_cb, normout); 
+	}
+
+	switch(source) {
+	case SOURCE_PCAP: pcap_dispatch_file(&dd, sourcef); break;
+	case SOURCE_NORMALIZED: normalized_dispatch_file(&dd, sourcef); break;
+	default: printf("PANIC: Unknown source type?!\n"); return -1;
+	}
+
+	return 0;
+}
