@@ -5,7 +5,7 @@ Cassandra interface
 
 Network RX is not yet tested
 
-Main program needs getopt to do more useful things
+Main program needs to do more useful things
 
 Reader position should come in via a file rather than being statically
 defined in readerloc.c
