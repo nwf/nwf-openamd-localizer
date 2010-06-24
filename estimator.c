@@ -40,6 +40,7 @@ update_badge_pos(est_badge_data *data,	/* This badge */
 			data->denom -= cell->denom;
 			data->sumx  -= cell->sumx;
 			data->sumy  -= cell->sumy;
+			data->sumz	-= cell->sumz;
 			memset(cell, 0, sizeof(*cell));
 		}
 		data->head_seqid = seq;
