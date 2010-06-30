@@ -10,6 +10,7 @@
 
 #include "dispatch.h"
 #include "estimation.h"
+#include "network_rx.h"
 #include "normalized_rxtx.h"
 #include "openbeacon.h"
 #include "pcap_rx.h"
@@ -111,6 +112,7 @@ main(int argc, char **argv) {
 	switch(source) {
 	case SOURCE_PCAP: pcap_dispatch_file(&dd, sourcef); break;
 	case SOURCE_NORMALIZED: normalized_dispatch_file(&dd, sourcef); break;
+	case SOURCE_NETWORK: network_loop(&dd, port); break;
 	default: printf("PANIC: Unknown source type?!\n"); return -1;
 	}
 
