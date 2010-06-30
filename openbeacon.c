@@ -54,7 +54,7 @@ print_badge_structured_data(FILE *f, openbeacon_badge *b)
 		return;
 	}
 #define BAVG(x) (b->data.sum##x / b->data.denom)
-	fprintf(f, "%X %lX %A %A %A %X %2.2X@%lX\n",
+	fprintf(f, "%X %lX %lA %lA %lA %X %2.2X@%lX\n",
 		b->id, b->last_print_time.tv_sec,
 		BAVG(x), BAVG(y), BAVG(z), b->data.denom,
 		b->last_touch_value, b->last_touch_time.tv_sec);
