@@ -1,6 +1,7 @@
 #define _GNU_SOURCE
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <strings.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -35,7 +36,7 @@ main(int argc, char **argv) {
 	FILE *normout = NULL;
 
 	FILE *sourcef = NULL;
-	// int port = -1;
+	int port = -1;
 	enum { SOURCE_NONE
 	     , SOURCE_NETWORK
 	     , SOURCE_NORMALIZED
@@ -67,11 +68,31 @@ main(int argc, char **argv) {
 			do_tracker = 1;
 			btd.structured_out_file = fopen(optarg, "w");
 			break;
+		case 'U':
+			source = SOURCE_NETWORK;
+			if(sourcef) fclose(sourcef);
+			port = atoi(optarg);
+			break;
 		case 'h':	usage(); return -1;
 		}
 	}
 
-	if(source == SOURCE_NONE) {
+	switch(source) {
+	case SOURCE_PCAP:
+		// FALLTHROUGH
+	case SOURCE_NORMALIZED:
+		if(!sourcef) {
+			printf("Couldn't open source file\n");
+			return -1;
+		}
+		break;
+	case SOURCE_NETWORK:
+		if(port < 0) {
+			printf("Impossible network port: %d\n", port);
+			return -1;
+		}
+		break;
+	case SOURCE_NONE:
 		printf("No source specified; nothing to do.\n");
 		return -1;
 	}
