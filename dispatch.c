@@ -11,8 +11,16 @@
 #include "util.h"
 
 static const xxteakey cryptokeys[] =
-	{ { { 0x9c43725e, 0xad8ec2ab, 0x6ebad8db, 0xf29c3638 } }
-	, { { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF } }
+    { { "TLH"      , { 0x9c43725e, 0xad8ec2ab, 0x6ebad8db, 0xf29c3638 } } 
+    , { "25C3 beta", { 0x7013F569, 0x4417CA7E, 0x07AAA968, 0x822D7554 } }
+    , { "Camp 2007", { 0x8e7d6649, 0x7e82fa5b, 0xddd4541e, 0xe23742cb } }  
+    , { "UNK 1"    , { 0xab94ec75, 0x160869c5, 0xfbf908da, 0x60bedc73 } }
+    , { "24C3 key" , { 0xb4595344, 0xd3e119b6, 0xa814d0ec, 0xeff5a24e } }
+    , { "25C3 real", { 0xbf0c3a08, 0x1d4228fc, 0x4244b2b0, 0x0b4492e9 } }
+    , { "23C3 ?"   , { 0xdeadbeef, 0xdeadbeef, 0xdeadbeef, 0xdeadbeef } } 
+    , { "23C3 key" , { 0xe107341e, 0xab99c57e, 0x48e17803, 0x52fb4d16 } } 
+    , { "UNK 2"    , { 0xee2522d1, 0xdbc221f1, 0xa21d0d0e, 0x865976a2 } }
+	, { "Fs"       , { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF } }
 	};
 #define NR_CRYPTKEYS (sizeof cryptokeys)/(sizeof cryptokeys[0])
 
