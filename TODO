@@ -1,11 +1,8 @@
-Cassandra interface 
-	The Captain's tool just needs to be rewritten to parse a different
-	structured format, I think, perhaps the one emitted by 
-	openbeacon.c:/^print_badge_structured_data
-
 Network RX is not yet tested
 
 Main program needs to do more useful things
 
 Reader position should come in via a file rather than being statically
 defined in readerloc.c
+
+Key ids are a little hackish right now, and oid remapping moreso.

@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 typedef struct {
+	char *keyname;
 	uint32_t keybits[4];
 } xxteakey;
 

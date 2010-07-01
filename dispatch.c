@@ -67,17 +67,17 @@ dispatch_set_backoff_callback(dispatch_data *dd, dispatch_callback cb, void *dat
 }
 
 static void
-dispatch(dispatch_data *dd, uint8_t *s, rx_id src, const struct timeval *tv)
+dispatch(dispatch_data *dd, uint8_t *s, dispatch_rx_info *rxi, const struct timeval *tv)
 {
 	uint8_t type = *(s+1);
 
 	if(dd->omni_cb != NULL)
-		dd->omni_cb(dd->omni_data, s, src, tv);
+		dd->omni_cb(dd->omni_data, s, rxi, tv);
 
 	if(dd->dcbs[type].cb != NULL)
-		dd->dcbs[type].cb(dd->dcbs[type].data, s, src, tv);
+		dd->dcbs[type].cb(dd->dcbs[type].data, s, rxi, tv);
 	else if (dd->backoff_cb != NULL)
-		dd->backoff_cb(dd->backoff_data, s, src, tv);
+		dd->backoff_cb(dd->backoff_data, s, rxi, tv);
 }
 
 #define XXTEA_TRY_LEN	16
@@ -91,19 +91,25 @@ dispatch_packets(dispatch_data *dd,
 	uint8_t *s = _buf;
 	uint8_t *e = &_buf[pktsize];
 
+	dispatch_rx_info rxi;
+	rxi.rxid = src;
+
 	toploop:
 	if(DEBUG) printf("buf (%ld) = %2x %2x %2x %2x\n", e-s, s[0], s[1], s[2], s[3]);
 
 	while(s + 4 < e) {
 		uint8_t pl = *s;			/* Read a length byte */
 
+		rxi.keyid = -1;
+
 		if(wellformed(s,e)) {
-			dispatch(dd, s, src, tv);
+			dispatch(dd, s, &rxi, tv);
 			s += pl;
 		} else {
 			if(e-s >= XXTEA_TRY_LEN) {
 				/* Try cryptography.  Man what a hack */
 				for(int ki = 0; ki < NR_CRYPTKEYS; ki++) {
+					rxi.keyid = ki;
 					uint8_t *sbuf = alloca(XXTEA_TRY_LEN);
 					if(!sbuf) {
 						if(DEBUG) fprintf(stderr, "Cannot allocate on stack!");
@@ -124,7 +130,7 @@ dispatch_packets(dispatch_data *dd,
 
 					if(*sbuf == XXTEA_TRY_LEN
 					&& wellformed(sbuf, sbuf+XXTEA_TRY_LEN)) {
-						dispatch(dd, sbuf, src, tv);
+						dispatch(dd, sbuf, &rxi, tv);
 						s += XXTEA_TRY_LEN;
 						goto toploop;
 					}
@@ -137,4 +143,8 @@ dispatch_packets(dispatch_data *dd,
 
 }
 
-
+const char *
+dispatch_keyname_by_id(int id)
+{
+	return cryptokeys[id].keyname;
+}

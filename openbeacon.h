@@ -39,6 +39,6 @@ typedef struct {
   FILE *structured_out_file;
 } openbeacon_tracker_data;
 
-void beacontracker_cb(void*, uint8_t *, rx_id, const struct timeval *);
+void beacontracker_cb(void*, uint8_t *, dispatch_rx_info *, const struct timeval *);
 
 #endif/*__OPENBEACON_H__*/

@@ -71,25 +71,36 @@ print_badge_structured_data(FILE *f, openbeacon_badge *b)
 void
 beacontracker_cb(void *d
                 , uint8_t *bytes
-                , rx_id rxer
+                , dispatch_rx_info *rxi
                 , const struct timeval *tv
                 )
 {
 	openbeacon_tracker_data *btd = d;
+	rx_id rxer = rxi->rxid;
 
 	openbeacon_tracker_packet pp;
 	read_beacontracker(bytes, &pp);
 
-	if ((pp.oid > BADGE_MAXIMUM_ID) || (pp.oid < BADGE_MINIMUM_ID)) {
-		printf("Suspicious OID (outside designated range): %d\n", pp.oid);
+		/* Because nobody's been good about keeping their OID spaces
+		 * separate, despite the whopping 32 bit space available to
+		 * them, we at least ensure that our plaintext ones end up
+		 * not getting stomped on by anybody else.
+		 */
+	int oid = pp.oid + ((rxi->keyid+1)<<16);
+
+#if 0
+	// Removed because we feel like tracking a lot more things.
+	if ((oid > BADGE_MAXIMUM_ID) || (oid < BADGE_MINIMUM_ID)) {
+		printf("Suspicious OID (outside designated range): %d\n", oid);
 		return;
 	}
+#endif
 
-	gpointer _b = g_hash_table_lookup(btd->oid_estdata, &pp.oid);
+	gpointer _b = g_hash_table_lookup(btd->oid_estdata, &oid);
 	openbeacon_badge *b = _b;
 	if(!_b) {
 		b = calloc(1, sizeof(openbeacon_badge));
-		b->id = pp.oid;
+		b->id = oid;
 		g_hash_table_insert(btd->oid_estdata, &b->id, (gpointer) b);
 	}
 
@@ -100,7 +111,7 @@ beacontracker_cb(void *d
 	}
 
 	if(0) printf("RXer %8.8x saw %d (seq=%x, pl=%x))\n",
-				rxer, pp.oid, pp.seq, pp.strength);
+				rxer, oid, pp.seq, pp.strength);
 
 	struct timeval last_time = b->last_print_time;
 

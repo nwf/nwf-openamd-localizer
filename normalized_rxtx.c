@@ -24,8 +24,10 @@
 
 void
 normalized_write_cb(void *_f, uint8_t *bytes,
-					rx_id rxid, const struct timeval *tv) {
+					dispatch_rx_info *rxi, const struct timeval *tv) {
 	FILE *f = _f;
+
+	rx_id rxid = rxi->rxid;
 
 	fprintf(f, HEADER_FORMAT_WRITE_STRING, rxid, tv->tv_sec, tv->tv_usec);
 	int len = *bytes;

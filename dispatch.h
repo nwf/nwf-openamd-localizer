@@ -7,9 +7,17 @@
 
 typedef uint32_t rx_id;
 
+typedef struct {
+		/** @brief Quasi-opaque key identifier used to decrypt this key.
+		 *  @note  -1 for plaintext packets.
+		 */
+	int keyid;
+	rx_id rxid;
+} dispatch_rx_info;
+
 typedef void (*dispatch_callback)(void *
                                  , uint8_t *
-                                 , rx_id
+                                 , dispatch_rx_info *
                                  , const struct timeval *
                                  );
 
@@ -35,5 +43,7 @@ void dispatch_set_omni_callback(dispatch_data *, dispatch_callback, void *);
 void dispatch_set_backoff_callback(dispatch_data *,	dispatch_callback, void *);
 void dispatch_packets(dispatch_data *, uint8_t *,
 						ssize_t, rx_id, const struct timeval *);
+
+const char *dispatch_keyname_by_id(int);
 
 #endif

@@ -7,7 +7,8 @@
 
 #include "dispatch.h"
 
-void normalized_write_cb(void *, uint8_t *, rx_id, const struct timeval *);
+void normalized_write_cb(void *, uint8_t *,
+							dispatch_rx_info *, const struct timeval *);
 void normalized_dispatch_file(dispatch_data *, FILE *);
 
 #endif
