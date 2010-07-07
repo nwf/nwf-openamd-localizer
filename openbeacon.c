@@ -123,7 +123,7 @@ beacontracker_cb(void *d
 		b->last_touch_value = pp.flags;
 	}
 
-	if(tv == NULL || (tv->tv_sec - last_time.tv_sec > 1)) {
+	if(tv == NULL || (tv->tv_sec - last_time.tv_sec >= 1)) {
 		if(tv != NULL) b->last_print_time = *tv;
 		if(btd->human_out_file)
 			print_badge_human_data(btd->human_out_file, b);
