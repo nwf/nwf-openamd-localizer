@@ -67,7 +67,7 @@ network_loop(dispatch_data *dd, int udp_port) {
 		}
 
 		gettimeofday(&tv, NULL);
-		dispatch_packets(dd, buf, pktsize, src_addr.sin_addr.s_addr, &tv);
+		dispatch_packets(dd, buf, pktsize, ntohl(src_addr.sin_addr.s_addr), &tv);
 	}
 }
 
