@@ -6,6 +6,7 @@
 
 #include "dispatch.h"
 #include "estimation.h"
+#include "readerloc.h"
 #include "openbeacon.h"
 #include "util.h"
 
@@ -130,4 +131,15 @@ beacontracker_cb(void *d
 		if(btd->structured_out_file)
 			print_badge_structured_data(btd->structured_out_file, b);
 	}
+}
+
+void beacontracker_init_data(openbeacon_tracker_data *btd) {
+	btd->oid_estdata = g_hash_table_new_full(g_int_hash, g_int_equal, NULL, free);
+	btd->rxid_location = reader_location_new_table();	
+}
+
+void beacontracker_cleanup_data(openbeacon_tracker_data *btd) {
+	g_hash_table_destroy(btd->oid_estdata);
+	btd->oid_estdata = NULL;
+	reader_location_cleanup(&btd->rxid_location);
 }

@@ -21,6 +21,7 @@ usage(void) {
 	printf("OpenBeacon aggregator framework.  Command line usage:\n");
 	printf("Packet sources: -P pcap_file, -N normalized_file, -U udp_port\n");
 	printf("Packet logging: -O normalized_file\n");
+	printf("Reader locations: -L location_file\n");
 	printf("OpenBeacon Tracker estimation output: -H human, -S structured\n");
 }
 
@@ -44,12 +45,17 @@ main(int argc, char **argv) {
 	     , SOURCE_PCAP }
 	  source = SOURCE_NONE;
 
+	char *readerloc = NULL;
+
 	int opt;
 	while((opt = getopt(argc, argv, "H:N:O:P:S:U:h")) != -1) {
 		switch (opt) {
 		case 'H':
 			do_tracker = 1;
 			btd.human_out_file = fopen(optarg, "w");
+			break;
+		case 'L':
+			readerloc = optarg;
 			break;
 		case 'N':
 			source = SOURCE_NORMALIZED;
@@ -99,9 +105,21 @@ main(int argc, char **argv) {
 	}
 
 	if(do_tracker) {
-		// XXX
-		btd.rxid_location = load_reader_location_data();
-		btd.oid_estdata = g_hash_table_new(g_int_hash, g_int_equal);
+		beacontracker_init_data(&btd);
+
+		FILE *readersf;
+		if(!readerloc)
+			readerloc = "readers.txt";
+		readersf = fopen(readerloc, "r");
+		if(!readersf) {
+			printf("Unable to open readers file: %s: %m\n", readerloc);
+		}
+
+		reader_location_load_data(readersf, btd.rxid_location);
+		printf("FYI, I read in %d reader locations\n",
+			g_hash_table_size(btd.rxid_location));
+		fclose(readersf);
+
 		dispatch_set_callback(&dd, OPENBEACON_PROTO_BEACONTRACKER,
 								beacontracker_cb, &btd);
 	}
@@ -115,6 +133,15 @@ main(int argc, char **argv) {
 	case SOURCE_NETWORK: network_loop(&dd, port); break;
 	default: printf("PANIC: Unknown source type?!\n"); return -1;
 	}
+
+	/* Make cleanup easier on valgrind */
+	beacontracker_cleanup_data(&btd);
+#define IFFCL(x) do { if(x) { fclose(x); x = NULL; } } while(0)
+	IFFCL(normout);
+	IFFCL(sourcef);
+	IFFCL(btd.structured_out_file);
+	IFFCL(btd.human_out_file);
+#undef IFFCL
 
 	return 0;
 }

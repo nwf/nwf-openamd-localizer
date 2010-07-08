@@ -47,4 +47,5 @@ pcap_dispatch_file(dispatch_data *dd, FILE* f) {
 
 	pcap_t *pf = pcap_fopen_offline(f, errbuf);
 	pcap_loop(pf, -1, handler, (u_char *) dd);
+	pcap_close(pf);
 }
