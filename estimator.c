@@ -48,7 +48,7 @@ main(int argc, char **argv) {
 	char *readerloc = NULL;
 
 	int opt;
-	while((opt = getopt(argc, argv, "H:N:O:P:S:U:h")) != -1) {
+	while((opt = getopt(argc, argv, "H:L:N:O:P:S:U:h")) != -1) {
 		switch (opt) {
 		case 'H':
 			do_tracker = 1;
@@ -113,6 +113,7 @@ main(int argc, char **argv) {
 		readersf = fopen(readerloc, "r");
 		if(!readersf) {
 			printf("Unable to open readers file: %s: %m\n", readerloc);
+			return -1;
 		}
 
 		reader_location_load_data(readersf, btd.rxid_location);
