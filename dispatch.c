@@ -112,7 +112,7 @@ dispatch_packets(dispatch_data *dd,
 
 		if(wellformed(s,e)) {
 			dispatch(dd, s, &rxi, tv);
-			s += pl;
+			s += pl;	/* Move to next packet */
 		} else {
 			if(e-s >= XXTEA_TRY_LEN) {
 				/* Try cryptography.  Man what a hack */
@@ -142,13 +142,14 @@ dispatch_packets(dispatch_data *dd,
 						s += XXTEA_TRY_LEN;
 						goto toploop;
 					}
-				}	
+				}
+				/* Packet not well formed and no cryptography we know how to do
+				 * was able to save us.  Give up.
+				 */
+				break;	
 			}
 		}
-
-		s += pl;	/* Move to next packet */
 	}	
-
 }
 
 const char *
