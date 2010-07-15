@@ -3,3 +3,4 @@
 *.dep
 .depcheck
 estimator
+spaceparttree_test
