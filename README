@@ -1,0 +1,23 @@
+This is The Next HOPE's OpenAMD packet framer and position estimation tool.
+Roughly, the code breaks down as follows:
+
+dispatch : the OpenAMD framing, decryption, and callback logic
+
+	network_rx		: Process OpenAMD packets from a UDP port listener
+	normalized_rxtx : Process or produce OpenAMD packets in a "normalized" form
+
+		sputnik_to_norm.pl : Mangle Sputnik logs into normalized form
+
+	pcap_rx			: Process OpenAMD packets from a PCAP log file
+
+util	: Misc utility functions that didn't fit elsewhere
+
+spaceparttree : A 3D spacial partitioning tree.
+
+	spaceparttree_test : A simple test program.
+
+openbeacon : specific OpenAMD OpenBeacon position estimation code
+
+	readerloc : parse a database of receiver positions
+
+estimator.c	: The main program that glues it all together for TNH
