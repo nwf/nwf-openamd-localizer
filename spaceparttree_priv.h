@@ -1,6 +1,8 @@
 #ifndef _SPACEPARTTREE_PRIV_H_
 #define _SPACEPARTTREE_PRIV_H_
 
+#include <glib/ghash.h>
+
 typedef enum {
 	SPT_NODE_TYPE_BSP,
 	SPT_NODE_TYPE_LABEL,
@@ -47,7 +49,7 @@ typedef struct {
 	double x;
 	double y;
 	double z;
-} sbp_variables ;
+} spt_variables ;
 
 	/* The typedef for this is in the public header */
 struct spt {

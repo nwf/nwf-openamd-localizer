@@ -3,7 +3,7 @@
  *
  * The serialized format is a series of lines, each of which look like
  *  [LABEL] [TYPE] ...\n
- * LABEL is a space-free token of your choosing, and TYPE is one of
+ * LABEL is a unique space-free token of your choosing, and TYPE is one of
  *  'B' for a Binary decision node
  *  'L' for a Label node
  *
@@ -19,8 +19,6 @@
  *  VALUE is a floating point value suitable for strtod,
  *  and TRUE and FALSE are LABELs previously assigned to nodes.
  *
- * LABEL references are always to the most recent node given that name, so
- * they shadow as might be expected.  It may be best to keep the labels unique.
  */
 
 #ifndef _SPACEPARTTREE_H_

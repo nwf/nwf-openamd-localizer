@@ -41,6 +41,9 @@ spt_read_from_file(FILE *f)
 		char *_nodelabel = strtok_r(line, spt_read_delim, &toksave);
 		char *_nodetype = strtok_r(NULL, spt_read_delim, &toksave);
 
+		/* Empty lines and comments */
+		if(!_nodelabel || *_nodelabel == '#') { continue; }
+
 		if(!_nodetype) {
 			fprintf(stderr
 				   ,"SPT reader aborting on line %d with malformed line.\n"
@@ -159,6 +162,12 @@ spt_read_from_file(FILE *f)
 
 		snh->nodelabel = strdup(_nodelabel);
 		if(!snh->nodelabel) { goto failoom; }
+		if(g_hash_table_lookup(ret->nodebyname, snh->nodelabel)) {
+			fprintf(stderr
+				   ,"SPT reader aborting on line %d with duplicate node defn\n"
+				   ,lineno);
+			goto fail;
+		}
 		g_hash_table_insert(ret->nodebyname, snh->nodelabel, snh);
 	}
 
@@ -237,12 +246,12 @@ spt_print(spt *s, FILE *f)
 	fflush(f);
 }
 
-char *
-spt_label_internal(sbp_variables *vs, spt_node_header *snh)
+static spt_node_label *
+spt_lookup_leaf(spt_variables *vs, spt_node_header *snh)
 {
 	switch(snh->nodetype) {
 	case SPT_NODE_TYPE_LABEL:
-		return ((spt_node_label*)snh)->printlabel;
+		return ((spt_node_label*)snh);
 	case SPT_NODE_TYPE_BSP: {
 		spt_node_bsp *snb = (spt_node_bsp*)snh;
 
@@ -262,7 +271,7 @@ spt_label_internal(sbp_variables *vs, spt_node_header *snh)
 		case SPT_COMP_GT: if(v1 > snb->value)  { targ = snb->t; }; break;
 		}
 
-		return spt_label_internal(vs, targ); }
+		return spt_lookup_leaf(vs, targ); }
 	default :  assert(0);
 	}
 }
@@ -272,8 +281,9 @@ spt_label(spt *s, double x, double y, double z)
 {
 	if(s == NULL) { return NULL; }
 
-	sbp_variables vs = {.x = x, .y = y, .z = z};
-	return spt_label_internal(&vs, s->root);
+	spt_variables vs = {.x = x, .y = y, .z = z};
+	spt_node_label *snl = spt_lookup_leaf(&vs, s->root);
+	return snl->printlabel;
 }
 
 void
