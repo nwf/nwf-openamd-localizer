@@ -129,9 +129,9 @@ update_badge_pos(openbeacon_badge_data *data,	/* This badge */
 	openbeacon_badge_hist_cell *cell = &data->cells[index];
 
 #define BUPD(x) do { \
-		double incr = rxl->r##x * prox; \
-		cell->sum##x += incr;           \
-		data->sum##x += incr;           \
+		double incr = rxl->r##x * rxl->weight * prox; \
+		cell->sum##x += incr;                         \
+		data->sum##x += incr;                         \
 	} while(0)
 
 	BUPD(x);
@@ -139,8 +139,8 @@ update_badge_pos(openbeacon_badge_data *data,	/* This badge */
 	BUPD(z);
 #undef BUPD
 
-	cell->denom += prox;
-	data->denom += prox;
+	cell->denom += prox * rxl->weight;
+	data->denom += prox * rxl->weight;
 }
 
 

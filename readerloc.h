@@ -7,6 +7,7 @@
 
 typedef struct {
 	rx_id id;
+	double weight;
 	double rx, ry, rz;
 } rx_loc;
 

@@ -45,6 +45,7 @@ void reader_location_load_data(FILE *f, GHashTable *ret) {
 		&a,&b,&c,&d,&rl->rx,&rl->ry,&rl->rz
 	) == 7) {
 		rl->id = IPv4(a,b,c,d);
+		rl->weight = 1.0;
 		g_hash_table_insert(ret, (gpointer) &rl->id, (gpointer) rl);
 		rl = calloc(1, sizeof(rx_loc));
 	}
