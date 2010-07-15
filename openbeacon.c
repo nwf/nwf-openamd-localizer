@@ -48,6 +48,23 @@ print_badge_human_data(FILE *f, openbeacon_badge *b)
 	}
 }
 
+	/** Print badge information in a structured way */
+static void
+print_badge_structured_data(FILE *f, openbeacon_badge *b)
+{
+	if(b->data.denom == 0) {
+		return;
+	}
+#define BAVG(x) (b->data.sum##x / b->data.denom)
+	fprintf(f, "%X %lX %lA %lA %lA %X %2.2X@%lX\n",
+		b->id, b->last_print_time.tv_sec,
+		BAVG(x), BAVG(y), BAVG(z), b->data.denom,
+		b->last_touch_value, b->last_touch_time.tv_sec);
+#undef BAVG
+}
+
+
+
 static void
 update_badge_pos(openbeacon_badge_data *data,	/* This badge */
 					uint32_t seq,		/* This sequence number */
@@ -123,21 +140,6 @@ update_badge_pos(openbeacon_badge_data *data,	/* This badge */
 	data->denom += prox;
 }
 
-
-	/** Print badge information in a structured way */
-static void
-print_badge_structured_data(FILE *f, openbeacon_badge *b)
-{
-	if(b->data.denom == 0) {
-		return;
-	}
-#define BAVG(x) (b->data.sum##x / b->data.denom)
-	fprintf(f, "%X %lX %lA %lA %lA %X %2.2X@%lX\n",
-		b->id, b->last_print_time.tv_sec,
-		BAVG(x), BAVG(y), BAVG(z), b->data.denom,
-		b->last_touch_value, b->last_touch_time.tv_sec);
-#undef BAVG
-}
 
 
 	/** The dispatch.c callback for OPENBEACON_PROTO_BEACONTRACKER.
