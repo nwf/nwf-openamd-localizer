@@ -88,18 +88,18 @@ main(int argc, char **argv) {
 		// FALLTHROUGH
 	case SOURCE_NORMALIZED:
 		if(!sourcef) {
-			printf("Couldn't open source file\n");
+			fprintf(stderr, "Couldn't open source file\n");
 			return -1;
 		}
 		break;
 	case SOURCE_NETWORK:
 		if(port < 0) {
-			printf("Impossible network port: %d\n", port);
+			fprintf(stderr, "Impossible network port: %d\n", port);
 			return -1;
 		}
 		break;
 	case SOURCE_NONE:
-		printf("No source specified; nothing to do.\n");
+		fprintf(stderr, "No source specified; nothing to do.\n");
 		return -1;
 	}
 
@@ -131,7 +131,7 @@ main(int argc, char **argv) {
 	case SOURCE_PCAP: pcap_dispatch_file(&dd, sourcef); break;
 	case SOURCE_NORMALIZED: normalized_dispatch_file(&dd, sourcef); break;
 	case SOURCE_NETWORK: network_loop(&dd, port); break;
-	default: printf("PANIC: Unknown source type?!\n"); return -1;
+	default: fprintf(stderr, "PANIC: Unknown source type?!\n"); return -1;
 	}
 
 	/* Make cleanup easier on valgrind */
