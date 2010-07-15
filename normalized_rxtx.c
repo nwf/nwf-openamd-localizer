@@ -63,4 +63,5 @@ normalized_dispatch_file(dispatch_data *dd, FILE *f) {
 
 		dispatch_packets(dd, pktbytes, pktbytes[0], rxid, &tv);
 	}
+	fclose(f);
 }

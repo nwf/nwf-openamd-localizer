@@ -138,7 +138,6 @@ main(int argc, char **argv) {
 	beacontracker_cleanup_data(&btd);
 #define IFFCL(x) do { if(x) { fclose(x); x = NULL; } } while(0)
 	IFFCL(normout);
-	IFFCL(sourcef);
 	IFFCL(btd.structured_out_file);
 	IFFCL(btd.human_out_file);
 #undef IFFCL
