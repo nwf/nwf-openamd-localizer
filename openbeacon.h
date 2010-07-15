@@ -7,6 +7,7 @@
 #include <glib/ghash.h>
 #include "config.h"
 #include "dispatch.h"
+#include "spaceparttree.h"
 
 #define OPENBEACON_PROTO_BEACONTRACKER	23
 
@@ -52,6 +53,8 @@ typedef struct {
   GHashTable *oid_estdata;
   /* rxer -> location map */
   GHashTable *rxid_location;
+  /* (x,y,z) -> area name */
+  spt *areaspt;
 
   FILE *human_out_file;
   FILE *structured_out_file;

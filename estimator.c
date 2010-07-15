@@ -31,6 +31,7 @@ main(int argc, char **argv) {
 
 	openbeacon_tracker_data btd;
 	bzero(&btd, sizeof(btd));
+	beacontracker_init_data(&btd);
 
 	int do_tracker = 0;
 
@@ -44,11 +45,15 @@ main(int argc, char **argv) {
 	     , SOURCE_PCAP }
 	  source = SOURCE_NONE;
 
+	char *areasptfile = NULL;
 	char *readerloc = NULL;
 
 	int opt;
-	while((opt = getopt(argc, argv, "H:L:N:O:P:S:U:h")) != -1) {
+	while((opt = getopt(argc, argv, "A:H:L:N:O:P:S:U:h")) != -1) {
 		switch (opt) {
+		case 'A':
+			areasptfile = optarg;
+			break;
 		case 'H':
 			do_tracker = 1;
 			btd.human_out_file = fopen(optarg, "w");
@@ -104,21 +109,43 @@ main(int argc, char **argv) {
 	}
 
 	if(do_tracker) {
-		beacontracker_init_data(&btd);
+		{
+			FILE *readersf;
+			if(!readerloc)
+				readerloc = "readers.txt";
+			readersf = fopen(readerloc, "r");
+			if(!readersf) {
+				fprintf(stderr,
+					"Unable to open readers file: %s: %m\n",
+					readerloc);
+				return -1;
+			}
 
-		FILE *readersf;
-		if(!readerloc)
-			readerloc = "readers.txt";
-		readersf = fopen(readerloc, "r");
-		if(!readersf) {
-			printf("Unable to open readers file: %s: %m\n", readerloc);
-			return -1;
+			reader_location_load_data(readersf, btd.rxid_location);
+
+			fprintf(stderr, "FYI, I read in %d reader locations\n",
+				g_hash_table_size(btd.rxid_location));
+			fclose(readersf);
 		}
 
-		reader_location_load_data(readersf, btd.rxid_location);
-		printf("FYI, I read in %d reader locations\n",
-			g_hash_table_size(btd.rxid_location));
-		fclose(readersf);
+		{
+			FILE *areaf;
+			if(!areasptfile)
+				areasptfile = "areaspt.txt";
+			areaf = fopen(areasptfile, "r");
+			if(!areaf) {
+				fprintf(stderr,
+					"WARNING: Unable to open area SPT file: %s: %m\n",
+					areasptfile);
+			} else {
+				btd.areaspt = spt_read_from_file(areaf);
+				if(!btd.areaspt) {
+					fprintf(stderr,
+						"WARNING: Malformed SPT file %s will produce no area info.\n",
+						areasptfile);
+				}
+			}
+		}
 
 		dispatch_set_callback(&dd, OPENBEACON_PROTO_BEACONTRACKER,
 								beacontracker_cb, &btd);

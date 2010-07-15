@@ -17,6 +17,7 @@ ESTIMATOR_SOURCES= \
 		estimator.c \
 		openbeacon.c \
 		readerloc.c \
+		spaceparttree.c \
 
 SPACEPARTTREE_TEST_SOURCES= \
 		spaceparttree.c \

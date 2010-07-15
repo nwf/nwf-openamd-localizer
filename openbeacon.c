@@ -9,6 +9,7 @@
 #include "dispatch.h"
 #include "readerloc.h"
 #include "openbeacon.h"
+#include "spaceparttree.h"
 #include "util.h"
 
 	/** Unmarshal a beacontracker packet into its logical form.
@@ -27,15 +28,16 @@ read_beacontracker(uint8_t *b, openbeacon_tracker_packet *pkt) {
 
 	/** Print badge information in a vaguely-human-readable form */
 static void
-print_badge_human_data(FILE *f, openbeacon_badge *b)
+print_badge_human_data(FILE *f, openbeacon_tracker_data *btd, openbeacon_badge *b)
 {
 	if(b->data.denom == 0) {
 		printf("BADGE %d: NO DATA\n", b->id);
 	}
 #define BAVG(x) (b->data.sum##x / b->data.denom)
-	fprintf(f, "BADGE %d: ESTIMATE AS OF %ld IS (%f, %f, %f) (/%d) (F%2.2x@%ld)\n",
+	fprintf(f, "BADGE %d: ESTIMATE AS OF %ld IS (%f, %f, %f) (/%d) [%s] (F%2.2x@%ld)\n",
 		b->id, b->last_print_time.tv_sec,
 		BAVG(x), BAVG(y), BAVG(z), b->data.denom,
+		spt_label(btd->areaspt, BAVG(x), BAVG(y), BAVG(z)),
 		b->last_touch_value, b->last_touch_time.tv_sec);
 #undef BAVG
 
@@ -50,16 +52,17 @@ print_badge_human_data(FILE *f, openbeacon_badge *b)
 
 	/** Print badge information in a structured way */
 static void
-print_badge_structured_data(FILE *f, openbeacon_badge *b)
+print_badge_structured_data(FILE *f, openbeacon_tracker_data *btd, openbeacon_badge *b)
 {
 	if(b->data.denom == 0) {
 		return;
 	}
 #define BAVG(x) (b->data.sum##x / b->data.denom)
-	fprintf(f, "%X %lX %lA %lA %lA %X %2.2X@%lX\n",
+	fprintf(f, "%X %lX %lA %lA %lA %X %2.2X@%lX %s\n",
 		b->id, b->last_print_time.tv_sec,
 		BAVG(x), BAVG(y), BAVG(z), b->data.denom,
-		b->last_touch_value, b->last_touch_time.tv_sec);
+		b->last_touch_value, b->last_touch_time.tv_sec,
+		spt_label(btd->areaspt, BAVG(x), BAVG(y), BAVG(z)));
 #undef BAVG
 }
 
@@ -206,9 +209,9 @@ beacontracker_cb(void *d
 	if(tv == NULL || (tv->tv_sec - last_time.tv_sec >= 1)) {
 		if(tv != NULL) b->last_print_time = *tv;
 		if(btd->human_out_file)
-			print_badge_human_data(btd->human_out_file, b);
+			print_badge_human_data(btd->human_out_file, btd, b);
 		if(btd->structured_out_file)
-			print_badge_structured_data(btd->structured_out_file, b);
+			print_badge_structured_data(btd->structured_out_file, btd, b);
 	}
 }
 
@@ -221,4 +224,5 @@ void beacontracker_cleanup_data(openbeacon_tracker_data *btd) {
 	g_hash_table_destroy(btd->oid_estdata);
 	btd->oid_estdata = NULL;
 	reader_location_cleanup(&btd->rxid_location);
+	spt_cleanup(&btd->areaspt);
 }
