@@ -31,8 +31,7 @@ estimator: $(COMMON_SOURCES) $(ESTIMATOR_SOURCES) $(DEPCHECK_TARGET)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(ESTIMATOR_CFLAGS) -o $@ \
 	$(filter-out $(DEPCHECK_TARGET),$^)
 
-spaceparttree_test: $(COMMON_SOURCES) \
-					$(SPACEPARTTREE_TEST_SOURCES) \
+spaceparttree_test: $(SPACEPARTTREE_TEST_SOURCES) \
 					$(DEPCHECK_TARGET)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(ESTIMATOR_CFLAGS) -o $@ \
 	$(filter-out $(DEPCHECK_TARGET),$^)
