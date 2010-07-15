@@ -4,7 +4,7 @@ LDFLAGS+= -lpcap -lglib-2.0
 
 ESTIMATOR_CFLAGS=-funit-at-a-time
 
-TARGETS=estimator
+TARGETS=estimator spaceparttree_test
 
 COMMON_SOURCES= \
 		dispatch.c \
@@ -18,12 +18,21 @@ ESTIMATOR_SOURCES= \
 		openbeacon.c \
 		readerloc.c \
 
+SPACEPARTTREE_TEST_SOURCES= \
+		spaceparttree.c \
+		spaceparttree_test.c \
 
 DEP_SUFFIX=dep
 DEPCHECK_TARGET=.depcheck
 all: $(TARGETS)
 
 estimator: $(COMMON_SOURCES) $(ESTIMATOR_SOURCES) $(DEPCHECK_TARGET)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(ESTIMATOR_CFLAGS) -o $@ \
+	$(filter-out $(DEPCHECK_TARGET),$^)
+
+spaceparttree_test: $(COMMON_SOURCES) \
+					$(SPACEPARTTREE_TEST_SOURCES) \
+					$(DEPCHECK_TARGET)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(ESTIMATOR_CFLAGS) -o $@ \
 	$(filter-out $(DEPCHECK_TARGET),$^)
 
