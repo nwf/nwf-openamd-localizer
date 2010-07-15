@@ -5,8 +5,8 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <glib/ghash.h>
+#include "config.h"
 #include "dispatch.h"
-#include "estimation.h"
 
 #define OPENBEACON_PROTO_BEACONTRACKER	23
 
@@ -22,11 +22,29 @@ typedef struct{
 } openbeacon_tracker_packet;
 
 typedef struct {
+	int denom;
+	double sumx;
+	double sumy;
+	double sumz;
+} openbeacon_badge_hist_cell;
+
+typedef struct {
+	openbeacon_badge_hist_cell cells[HISTORY_WINDOW_SIZE];
+	int head_posn;			/* Position into the ring buffer */
+	uint32_t head_seqid;	/* last observed sequence ID */
+
+	double sumx;			/* Total over the whole FIFO */
+	double sumy;
+	double sumz;
+	int denom;
+} openbeacon_badge_data ;
+
+typedef struct {
 	int id;
 	uint8_t last_touch_value;
 	struct timeval last_touch_time;
 	struct timeval last_print_time;
-	est_badge_data data;
+	openbeacon_badge_data data;
 } openbeacon_badge;
 
 typedef struct {

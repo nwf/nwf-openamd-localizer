@@ -9,7 +9,6 @@
 #include <glib/ghash.h>
 
 #include "dispatch.h"
-#include "estimation.h"
 #include "network_rx.h"
 #include "normalized_rxtx.h"
 #include "openbeacon.h"

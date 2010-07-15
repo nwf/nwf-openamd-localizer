@@ -15,7 +15,6 @@ COMMON_SOURCES= \
 
 ESTIMATOR_SOURCES= \
 		estimator.c \
-		estimation.c \
 		openbeacon.c \
 		readerloc.c \
 
