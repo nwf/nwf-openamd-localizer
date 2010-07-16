@@ -199,7 +199,8 @@ beacontracker_cb(void *d
 	struct timeval last_time = b->last_print_time;
 
 	uint8_t prox = ((~pp.strength) & 0xF) + 1;
-	update_badge_pos(&b->data, pp.seq, (rx_loc*)rxloc, prox);
+	update_badge_pos(&b->data, pp.seq >> CONFIG_SEQUENCE_ID_SHIFT,
+						(rx_loc*)rxloc, prox);
 
 	if(tv != NULL && pp.flags != 0xFF) {
 		b->last_touch_time = *tv;
