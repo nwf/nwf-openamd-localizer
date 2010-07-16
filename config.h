@@ -6,7 +6,7 @@
 #define BADGE_MINIMUM_ID		3000	/* Inclusive */
 #define BADGE_MAXIMUM_ID		8000	/* Inclusive */
 
-#define HISTORY_WINDOW_SIZE		128	
+#define HISTORY_WINDOW_SIZE		32	
 	/** Optionally workaround a bug whereby sequence IDs are
 	 * not held constant within a burst of identical packets
 	 *
