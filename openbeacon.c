@@ -132,17 +132,19 @@ update_badge_pos(openbeacon_badge_data *data,	/* This badge */
 		if(DEBUG) fprintf(stderr, "NEAR PAST %d\n", seqdelta);
 		/* Index backwards, wrapping the fifo */
 		if (-seqdelta > data->head_posn) {
-			index = HISTORY_WINDOW_SIZE + seqdelta - data->head_posn;
+			index = data->head_posn + seqdelta + HISTORY_WINDOW_SIZE;
 		} else {
 			index = data->head_posn + seqdelta;
 		}
 	}
 
-	assert(index >= 0 && index < HISTORY_WINDOW_SIZE);
 
 	if(DEBUG) fprintf(stderr,
-				"Head at %d, Head seq %d, index %d\n",
-				data->head_posn, data->head_seqid, index);
+				"Head at %d, Head seq %d, seq delta %d, index %d\n",
+				data->head_posn, data->head_seqid, seqdelta, index);
+
+	assert(index >= 0 && index < HISTORY_WINDOW_SIZE);
+
 	openbeacon_badge_hist_cell *cell = &data->cells[index];
 
 #define BUPD(x) do { \
