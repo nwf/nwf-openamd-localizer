@@ -16,4 +16,6 @@
 	 */
 #define CONFIG_SEQUENCE_ID_SHIFT	2
 
+#define CONFIG_TOUCH_SQUELCH	10
+
 #endif

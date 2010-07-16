@@ -33,13 +33,22 @@ print_badge_human_data(FILE *f, openbeacon_tracker_data *btd, openbeacon_badge *
 	if(b->data.denom == 0) {
 		printf("BADGE %d: NO DATA\n", b->id);
 	}
+
 #define BAVG(x) (b->data.sum##x / b->data.denom)
-	fprintf(f, "BADGE %d: ESTIMATE AS OF %ld IS (%f, %f, %f) (/%d) [%s] (F%2.2x@%ld)\n",
-		b->id, b->last_print_time.tv_sec,
-		BAVG(x), BAVG(y), BAVG(z), b->data.denom,
-		spt_label(btd->areaspt, BAVG(x), BAVG(y), BAVG(z)),
-		b->last_touch_value, b->last_touch_time.tv_sec);
-#undef BAVG
+	if(b->last_print_time.tv_sec - b->last_touch_time.tv_sec < CONFIG_TOUCH_SQUELCH) {
+		fprintf(f, "BADGE %d: ESTIMATE AS OF %ld IS (%f, %f, %f) (/%d) [%s]"
+					" (F%2.2x@%ld)\n",
+			b->id, b->last_print_time.tv_sec,
+			BAVG(x), BAVG(y), BAVG(z), b->data.denom,
+			spt_label(btd->areaspt, BAVG(x), BAVG(y), BAVG(z)),
+			b->last_touch_value, b->last_touch_time.tv_sec);
+	} else {
+		fprintf(f, "BADGE %d: ESTIMATE AS OF %ld IS (%f, %f, %f) (/%d) [%s]\n",
+			b->id, b->last_print_time.tv_sec,
+			BAVG(x), BAVG(y), BAVG(z), b->data.denom,
+			spt_label(btd->areaspt, BAVG(x), BAVG(y), BAVG(z)));
+	}
+#undef BAVG	
 
 	if(DEBUG) for(int i = 0; i < HISTORY_WINDOW_SIZE; i++) {
 		fprintf(f, "\t%d:(%f,%f,%f)/%d\n", i,
@@ -58,11 +67,19 @@ print_badge_structured_data(FILE *f, openbeacon_tracker_data *btd, openbeacon_ba
 		return;
 	}
 #define BAVG(x) (b->data.sum##x / b->data.denom)
-	fprintf(f, "%X %lX %lA %lA %lA %X %2.2X@%lX %s\n",
-		b->id, b->last_print_time.tv_sec,
-		BAVG(x), BAVG(y), BAVG(z), b->data.denom,
-		b->last_touch_value, b->last_touch_time.tv_sec,
-		spt_label(btd->areaspt, BAVG(x), BAVG(y), BAVG(z)));
+	if(b->last_print_time.tv_sec - b->last_touch_time.tv_sec < CONFIG_TOUCH_SQUELCH) {
+		fprintf(f, "%X %lX %lA %lA %lA %X %2.2X@%lX %s\n",
+			b->id, b->last_print_time.tv_sec,
+			BAVG(x), BAVG(y), BAVG(z), b->data.denom,
+			b->last_touch_value, b->last_touch_time.tv_sec,
+			spt_label(btd->areaspt, BAVG(x), BAVG(y), BAVG(z)));
+	} else {
+		fprintf(f, "%X %lX %lA %lA %lA %X %2.2X@%lX %s\n",
+			b->id, b->last_print_time.tv_sec,
+			BAVG(x), BAVG(y), BAVG(z), b->data.denom,
+			0, 0UL,
+			spt_label(btd->areaspt, BAVG(x), BAVG(y), BAVG(z)));
+	}
 #undef BAVG
 }
 
