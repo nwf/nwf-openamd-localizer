@@ -219,7 +219,7 @@ spt_print_internal(FILE *f, int pc, spt_node_header *snh) {
 		
 		spt_print_internal(f, pc, snb->t);
 		spt_print_internal(f, pc, snb->f);
-		fprintf(f, "%s %c %c %s %g %s %s",
+		fprintf(f, "%s %c %c %s %g %s %s\n",
 			snh->nodelabel,
 			SPT_NODE_TYPE_BSP_CHAR,
 			spt_variable_name(snb->var),
