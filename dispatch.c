@@ -103,7 +103,7 @@ dispatch_packets(dispatch_data *dd,
 	rxi.rxid = src;
 
 	toploop:
-	if(DEBUG) printf("buf (%ld) = %2x %2x %2x %2x\n", e-s, s[0], s[1], s[2], s[3]);
+	if(DEBUG) fprintf(stderr, "buf (%ld) = %2x %2x %2x %2x\n", e-s, s[0], s[1], s[2], s[3]);
 
 	while(s + 4 < e) {
 		uint8_t pl = *s;			/* Read a length byte */
@@ -130,10 +130,10 @@ dispatch_packets(dispatch_data *dd,
 					shuffle_tx_byteorder((uint32_t*)sbuf, XXTEA_TRY_LEN/4);
 
 					if(DEBUG) {
-					printf("dec = %2.2x %2.2x %2.2x %2.2x", sbuf[0], sbuf[1], sbuf[2], sbuf[3]);
-					printf(" %2.2x %2.2x %2.2x %2.2x", sbuf[4], sbuf[5], sbuf[6], sbuf[7]);
-					printf(" %2.2x %2.2x %2.2x %2.2x", sbuf[8], sbuf[9], sbuf[10], sbuf[11]);
-					printf(" %2.2x %2.2x %2.2x %2.2x\n", sbuf[12], sbuf[13], sbuf[14], sbuf[15]);
+					fprintf(stderr, "dec = %2.2x %2.2x %2.2x %2.2x", sbuf[0], sbuf[1], sbuf[2], sbuf[3]);
+					fprintf(stderr, " %2.2x %2.2x %2.2x %2.2x", sbuf[4], sbuf[5], sbuf[6], sbuf[7]);
+					fprintf(stderr, " %2.2x %2.2x %2.2x %2.2x", sbuf[8], sbuf[9], sbuf[10], sbuf[11]);
+					fprintf(stderr, " %2.2x %2.2x %2.2x %2.2x\n", sbuf[12], sbuf[13], sbuf[14], sbuf[15]);
 					}
 
 					if(*sbuf == XXTEA_TRY_LEN
@@ -143,11 +143,11 @@ dispatch_packets(dispatch_data *dd,
 						goto toploop;
 					}
 				}
-				/* Packet not well formed and no cryptography we know how to do
-				 * was able to save us.  Give up.
-				 */
-				break;	
 			}
+			/* Packet not well formed and no cryptography we know how to do
+			 * was able to save us.  Give up.
+			 */
+			break;	
 		}
 	}	
 }
